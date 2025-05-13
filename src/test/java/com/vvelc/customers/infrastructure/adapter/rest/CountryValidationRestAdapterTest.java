@@ -8,22 +8,24 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CountryValidationRestAdapterTest {
 
+    @Mock
     private CountryValidationApiClient apiClient;
+
+    @InjectMocks
     private CountryValidationRestAdapter adapter;
 
     @BeforeEach
     void setup() {
-        apiClient = mock(CountryValidationApiClient.class);
-        adapter = new CountryValidationRestAdapter();
-        // Inyectar manualmente el mock (ya que @Inject no aplica en test)
-        adapter.countryApiClient = apiClient;
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -63,10 +65,11 @@ class CountryValidationRestAdapterTest {
 
     @Test
     void should_throw_when_api_returns_404() {
-        Response mockResponse = mock(Response.class);
-        when(mockResponse.getStatus()).thenReturn(Response.Status.NOT_FOUND.getStatusCode());
+        WebApplicationException exception = new WebApplicationException(
+                "Not Found",
+                Response.status(Response.Status.NOT_FOUND).build()
+        );
 
-        WebApplicationException exception = new WebApplicationException(mockResponse);
         when(apiClient.getCountryByCode("YY")).thenThrow(exception);
 
         assertThatThrownBy(() -> adapter.findByIsoCode("YY"))

@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
 @TestHTTPEndpoint(CustomerController.class)
-class CustomerControllerTest {
+class CustomerControllerIT {
 
     @Inject
     CustomerRepository repository;
@@ -57,12 +57,13 @@ class CustomerControllerTest {
                 .body("id", notNullValue())
                 .body("firstName", equalTo("Mark"))
                 .body("email", equalTo("mark@test.com"))
-                .body("demonym", equalTo("American"));
+                .body("demonym", equalTo("American"))
+                .header("Location", containsString("/customers/"));
     }
 
     @Test
     void should_fail_to_create_customer_with_invalid_email() {
-        CustomerCreateRequest request = new CustomerCreateRequest("Mark", "", "Wayne", "", "invalid-email", "Street 1", "8091231234", "US");
+        CustomerCreateRequest request = new CustomerCreateRequest("Mark", "", "Wayne", "", "invalid-email", "Street 1", "8091231234", "USI");
 
         given()
                 .contentType(ContentType.JSON)
@@ -71,7 +72,35 @@ class CustomerControllerTest {
                 .post()
                 .then()
                 .statusCode(400)
-                .body("messages", contains( "Email must be a valid email address"));
+                .body("messages", hasItem("Email must be a valid email address"));
+    }
+
+    @Test
+    void should_fail_to_create_customer_with_invalid_country_code() {
+        CustomerCreateRequest request = new CustomerCreateRequest("Mark", "", "Wayne", "", "mark@test.com", "Street 1", "8091231234", "us");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post()
+                .then()
+                .statusCode(400)
+                .body("messages", hasItem("Country must be in ISO 3166-1 alpha-2 format (uppercase letters)"));
+    }
+
+    @Test
+    void should_fail_to_create_customer_with_nonexistent_country() {
+        CustomerCreateRequest request = new CustomerCreateRequest("Mark", "", "Wayne", "", "mark@test.com", "Street 1", "8091231234", "XX");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post()
+                .then()
+                .statusCode(400)
+                .body("message", equalTo("Country not found: XX"));
     }
 
     @Test
@@ -128,6 +157,22 @@ class CustomerControllerTest {
     }
 
     @Test
+    void should_get_customers_with_pagination() {
+        given()
+                .queryParam("page", 0)
+                .queryParam("size", 1)
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .body("items", hasSize(1))
+                .body("page", equalTo(0))
+                .body("size", equalTo(1))
+                .body("total", greaterThanOrEqualTo(2));
+
+    }
+
+    @Test
     void should_fail_with_invalid_country_query_param() {
         given()
                 .queryParam("country", "usa")
@@ -178,12 +223,41 @@ class CustomerControllerTest {
     }
 
     @Test
+    void should_return_400_when_updating_with_invalid_country_code() {
+        CustomerUpdateRequest update = new CustomerUpdateRequest("jane@test.com", null, null, "USA");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(update)
+                .when()
+                .put("/{id}", c1Id)
+                .then()
+                .statusCode(400)
+                .body("messages", hasItem("Country must be in ISO 3166-1 alpha-2 format (uppercase letters)"));
+    }
+
+    @Test
+    void should_return_400_when_updating_with_nonexistent_country() {
+        CustomerUpdateRequest update = new CustomerUpdateRequest("jane@test.com", null, null, "XX");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(update)
+                .when()
+                .put("/{id}", c1Id)
+                .then()
+                .statusCode(400)
+                .body("message", equalTo("Country not found: XX"));
+    }
+
+    @Test
     void should_delete_customer_successfully() {
         given()
                 .when()
                 .delete("/{id}", c1Id)
                 .then()
-                .statusCode(204);
+                .statusCode(204)
+                .body(is(emptyOrNullString()));
     }
 
     @Test
