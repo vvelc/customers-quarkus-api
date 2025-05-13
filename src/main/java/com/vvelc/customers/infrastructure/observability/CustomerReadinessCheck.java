@@ -13,8 +13,12 @@ import java.sql.Connection;
 @ApplicationScoped
 public class CustomerReadinessCheck implements HealthCheck {
 
+    final DataSource dataSource;
+
     @Inject
-    DataSource dataSource;
+    public CustomerReadinessCheck(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @Override
     public HealthCheckResponse call() {

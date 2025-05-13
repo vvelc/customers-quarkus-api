@@ -2,16 +2,13 @@ package com.vvelc.customers.infrastructure.persistence.repository;
 
 import com.vvelc.customers.domain.model.Customer;
 import com.vvelc.customers.domain.repository.CustomerRepository;
-import com.vvelc.customers.infrastructure.persistence.panache.CustomerPanacheRepository;
 import com.vvelc.customers.infrastructure.persistence.entity.CustomerEntity;
 import com.vvelc.customers.infrastructure.persistence.mapper.CustomerMapper;
-import io.quarkus.logging.Log;
+import com.vvelc.customers.infrastructure.persistence.panache.CustomerPanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @ApplicationScoped
 public class CustomerRepositoryImpl implements CustomerRepository {

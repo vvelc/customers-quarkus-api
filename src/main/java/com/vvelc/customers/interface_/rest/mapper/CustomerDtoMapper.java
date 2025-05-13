@@ -6,6 +6,9 @@ import com.vvelc.customers.interface_.rest.dto.CustomerResponse;
 import com.vvelc.customers.interface_.rest.dto.CustomerUpdateRequest;
 
 public class CustomerDtoMapper {
+    private CustomerDtoMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static Customer toDomain(CustomerCreateRequest request) {
         return new Customer(

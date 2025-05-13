@@ -4,6 +4,9 @@ import com.vvelc.customers.domain.model.Customer;
 import com.vvelc.customers.infrastructure.persistence.entity.CustomerEntity;
 
 public class CustomerMapper {
+    private CustomerMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static Customer toDomain(CustomerEntity entity) {
         if (entity == null) {

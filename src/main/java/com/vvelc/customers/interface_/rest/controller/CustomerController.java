@@ -25,7 +25,6 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.UUID;
 
 @Tag(name = "Customers", description = "Operaciones relacionadas con clientes")
 @Path(CustomerController.PATH)

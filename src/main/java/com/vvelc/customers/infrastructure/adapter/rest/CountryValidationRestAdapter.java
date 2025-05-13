@@ -8,22 +8,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonValue;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+/**
+ * This class is responsible for validating country information by calling an external REST API.
+ * It implements the CountryValidationPort interface.
+ */
 @ApplicationScoped
+@RequiredArgsConstructor
 public class CountryValidationRestAdapter implements CountryValidationPort {
 
     @Inject
     @RestClient
-    private CountryValidationApiClient countryApiClient;
-//
-//    public CountryValidationRestAdapter(@RestClient CountryValidationApiClient countryApiClient) {
-//        this.countryApiClient = countryApiClient;
-//    }
+    private final CountryValidationApiClient countryApiClient;
 
     @Override
     public CountryInfo findByIsoCode(String isoCode) throws CountryNotFoundException, CountryServiceException {
