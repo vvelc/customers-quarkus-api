@@ -24,7 +24,7 @@ API RESTful para la gestión de clientes, construida en Java con Quarkus. Permit
 | page       | Integer | Número de página para paginación      |
 | size       | Integer | Tamaño de página para paginación      |
 
-Para más detalles, visistar [Documentacion-API.md](./docs/Documentacion-API.md).
+Para más detalles, visistar [Documentacion-API](./docs/Documentacion-API.md).
 
 Puedes probar estos endpoints utilizando:
 * [Swagger UI](http://localhost:8080/q/swagger-ui), disponible al ejecutar el proyecto. Ver sección [Cómo ejecutar localmente](#rocket-cómo-ejecutar-localmente) para más detalles.
@@ -34,7 +34,7 @@ Puedes probar estos endpoints utilizando:
 
 ## 🪜 Tecnologías y dependencias clave
 
-* **Quarkus 3.2**
+* **Quarkus**
 * **Hibernate ORM Panache + Validator**
 * **PostgreSQL (producción)**, **H2 (tests)**
 * **Flyway** para migraciones
@@ -50,7 +50,7 @@ Puedes probar estos endpoints utilizando:
 
 ### Requisitos:
 
-* Java 17
+* Java 21
 * Maven 3.8+
 * Docker + Docker Compose (para modo contenedor)
 
@@ -87,6 +87,8 @@ La aplicación estará disponible en: [http://localhost:8080](http://localhost:8
 - Validación de país no permitido o no existente
 - Cliente duplicado (email)
 - Comportamiento del servicio ante cliente inexistente
+- Actualización parcial de cliente
+- Eliminar cliente
 
 ### ✅ Pruebas de integración
 - Crear → Obtener → Eliminar cliente
@@ -253,9 +255,9 @@ Para garantizar la **integridad del esquema** y un punto de partida reproducible
 ## 🔨 DevOps / CI
 
 * GitHub Actions:
-  * PENDIENTE BADGE DE ACTION
+  * [![github-actions](https://github.com/vvelc/customers-quarkus-api/actions/workflows/ci.yaml/badge.svg)](https://github.com/vvelc/customers-quarkus-api/actions/workflows/ci.yaml)
   * Build + Test
-  * Verificación de cobertura
+  * Verificación de cobertura con CodeCov
   * Análisis estático con SonarQube
 * Codecov:
   * [![codecov](https://codecov.io/github/vvelc/customers-quarkus-api/graph/badge.svg?token=8Z51LFOIAQ)](https://codecov.io/github/vvelc/customers-quarkus-api)
