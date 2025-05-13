@@ -27,31 +27,31 @@ public class CustomerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "first_name", nullable = false, length = 50)
     private String firstName;
 
-    @Column(length = 50)
+    @Column(name = "second_name", length = 50)
     private String secondName;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "first_last_name", nullable = false, length = 50)
     private String firstLastName;
 
-    @Column(length = 50)
+    @Column(name = "second_last_name", length = 50)
     private String secondLastName;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
-    @Column(length = 255)
+    @Column(name = "address", nullable = false, length = 255)
     private String address;
 
-    @Column(length = 20)
+    @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "country", nullable = false, length = 50)
     private String country;
 
-    @Column(length = 50)
+    @Column(name = "demonym", nullable = false, length = 50)
     private String demonym;
 
     // IDEA: We should consider adding createdAt and updatedAt fields to track when the customer was created and last updated.

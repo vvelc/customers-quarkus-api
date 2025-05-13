@@ -5,6 +5,7 @@ import com.vvelc.customers.domain.repository.CustomerRepository;
 import com.vvelc.customers.infrastructure.persistence.panache.CustomerPanacheRepository;
 import com.vvelc.customers.infrastructure.persistence.entity.CustomerEntity;
 import com.vvelc.customers.infrastructure.persistence.mapper.CustomerMapper;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -22,14 +23,15 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public void save(Customer order) {
-        CustomerEntity entity = CustomerMapper.toEntity(order);
+    public Customer save(Customer customer) {
+        CustomerEntity entity = CustomerMapper.toEntity(customer);
         customerPanacheRepository.persist(entity);
+        return CustomerMapper.toDomain(entity);
     }
 
     @Override
     public List<Customer> findAll(int page, int size) {
-        return customerPanacheRepository.findAll().list().stream()
+        return customerPanacheRepository.findAll().page(page, size).list().stream()
                 .map(CustomerMapper::toDomain)
                 .toList();
     }
@@ -42,7 +44,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public List<Customer> findByCountry(String country, int page, int size) {
-        return customerPanacheRepository.find("country", country).list().stream()
+        return customerPanacheRepository.find("country", country).page(page, size).list().stream()
                 .map(CustomerMapper::toDomain)
                 .toList();
     }
