@@ -54,6 +54,12 @@ jobs:
       - name: Run integration tests
         run: ./mvnw verify -Dit.test=*IT
 
+      - name: Upload Jacoco report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/jacoco.xml
+
   sonarcloud:
     name: ☁️ SonarCloud Analysis
     runs-on: ubuntu-latest
@@ -78,10 +84,9 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Run analysis
-        run: ./mvnw verify -DskipTests=true sonar:sonar \
+        run: ./mvnw verify -DskipTests=true \
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
-          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
-          -Dsonar.host.url=https://sonarcloud.io
 
   codecov:
     name: 📊 Code Coverage Report
@@ -92,6 +97,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Download Jacoco report
+        uses: actions/download-artifact@v3
+        with:
+          name: jacoco-report
+          path: ./target/site/jacoco
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
