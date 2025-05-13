@@ -181,4 +181,4 @@ Para visualizar los diagramas, puedes pegar su codigo en  [https://mermaid.live]
 
 ## ✍️ Autor
 
-Víctor Velázquez Cid [https://github.com/vvelc](https://github.com/vvelc)
+Víctor Velázquez Cid | [https://github.com/vvelc](https://github.com/vvelc)

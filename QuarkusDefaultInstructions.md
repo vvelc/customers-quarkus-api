@@ -1,24 +1,8 @@
-# Customers Quarkus API 
-Solución integral simplificada de gestión de clientes, para prueba técnica Back-End Developer
-
 # Introduction
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
-
-
-## CI/CD
-
-Este proyecto cuenta con integración continua usando **GitHub Actions**.
-
-Cada push ejecuta automáticamente:
-- Build del proyecto (Maven)
-- Pruebas unitarias
-- Validación de código
-
-> El pipeline está listo para incluir Docker y deploy en Railway o Render en caso de expansión.
-
 
 ## Running the application in dev mode
 
