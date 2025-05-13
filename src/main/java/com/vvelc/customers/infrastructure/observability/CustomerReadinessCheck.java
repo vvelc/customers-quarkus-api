@@ -1,7 +1,6 @@
 package com.vvelc.customers.infrastructure.observability;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.Readiness;
@@ -15,7 +14,6 @@ public class CustomerReadinessCheck implements HealthCheck {
 
     final DataSource dataSource;
 
-    @Inject
     public CustomerReadinessCheck(DataSource dataSource) {
         this.dataSource = dataSource;
     }
