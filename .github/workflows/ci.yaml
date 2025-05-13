@@ -55,7 +55,7 @@ jobs:
         run: ./mvnw verify -Dit.test=*IT
 
       - name: Upload Jacoco report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
           path: target/site/jacoco/jacoco.xml
@@ -99,7 +99,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Download Jacoco report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: jacoco-report
           path: ./target/site/jacoco
