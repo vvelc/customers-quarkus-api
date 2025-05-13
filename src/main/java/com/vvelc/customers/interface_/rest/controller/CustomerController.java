@@ -4,7 +4,9 @@ import com.vvelc.customers.application.model.PageRequest;
 import com.vvelc.customers.application.model.PageResponse;
 import com.vvelc.customers.application.service.CustomerService;
 import com.vvelc.customers.domain.model.Customer;
+import com.vvelc.customers.interface_.rest.controller.query.CustomerQueryParams;
 import com.vvelc.customers.interface_.rest.dto.CustomerCreateRequest;
+import com.vvelc.customers.interface_.rest.dto.CustomerPageResponse;
 import com.vvelc.customers.interface_.rest.dto.CustomerResponse;
 import com.vvelc.customers.interface_.rest.dto.CustomerUpdateRequest;
 import com.vvelc.customers.interface_.rest.mapper.CustomerDtoMapper;
@@ -22,6 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 @Tag(name = "Customers", description = "Operaciones relacionadas con clientes")
@@ -40,31 +43,23 @@ public class CustomerController {
     @APIResponse(responseCode = "201", description = "Cliente creado exitosamente", content = @Content(
             schema = @Schema(implementation = CustomerResponse.class)
     ))
+    @APIResponse(responseCode = "400", description = "Error de validación de datos")
+    @APIResponse(responseCode = "404", description = "No se encontró el cliente luego de crearlo")
     @RequestBody(
             content = @Content(
                     schema = @Schema(implementation = CustomerCreateRequest.class)
             )
     )
-    @APIResponse(responseCode = "404", description = "No se encontró el cliente luego de crearlo")
     public Response createCustomer(@Valid CustomerCreateRequest request) {
         Log.infof("Received customer creation request for: %s %s %s %s ",
                 request.firstName(), request.secondName(), request.firstLastName(), request.secondLastName());
 
-        Long id = customerService.createCustomer(
-                request.firstName(),
-                request.secondName(),
-                request.firstLastName(),
-                request.secondLastName(),
-                request.email(),
-                request.address(),
-                request.phone(),
-                request.country()
-        );
+        final Customer customer = CustomerDtoMapper.toDomain(request);
 
-        Customer customer = customerService.getCustomerById(id);
-        URI location = URI.create(String.format("%s/%s", CustomerController.PATH, customer.getId()));
+        Customer createdCustomer = customerService.createCustomer(customer);
 
-        CustomerResponse customerResponse = CustomerDtoMapper.toDto(customer);
+        URI location = URI.create(String.format("%s/%s", CustomerController.PATH, createdCustomer.getId()));
+        CustomerResponse customerResponse = CustomerDtoMapper.toDto(createdCustomer);
 
         return Response
                 .created(location)
@@ -93,20 +88,18 @@ public class CustomerController {
     @Operation(summary = "Obtener todos los clientes")
     @APIResponse(responseCode = "200", description = "Lista de clientes", content = @Content(
             schema = @Schema(
-                    implementation = PageResponse.class,
-                    oneOf = CustomerResponse.class
+                    implementation = CustomerPageResponse.class
             )
     ))
-    public Response getAll(
-            @QueryParam("country") String country,
-            @QueryParam("page") @DefaultValue("0") int page,
-            @QueryParam("size") @DefaultValue("10") int size
-    ) {
-        final PageRequest pageRequest = new PageRequest(page, size);
+    public Response getAll(@Valid @BeanParam CustomerQueryParams queryParams) {
+        final PageRequest pageRequest = new PageRequest(queryParams.getPage(), queryParams.getSize());
         final PageResponse<Customer> customers;
 
         // If a country is provided, filter customers by country
         // Otherwise, return all customers
+        String country = Optional.ofNullable(queryParams.getCountry())
+                .map(String::toUpperCase)
+                .orElse(null);
         if (country != null && !country.isBlank()) {
             Log.info("Received request to get customers by country: " + country);
             customers = customerService.getCustomersByCountry(country, pageRequest);
@@ -115,13 +108,13 @@ public class CustomerController {
             customers = customerService.getAllCustomers(pageRequest);
         }
 
-        final PageResponse<CustomerResponse> pageResponse = new PageResponse<>(
-                customers.items().stream()
+        final CustomerPageResponse pageResponse = new CustomerPageResponse(
+                customers.getItems().stream()
                         .map(CustomerDtoMapper::toDto)
                         .toList(),
-                customers.page(),
-                customers.size(),
-                customers.total()
+                customers.getPage(),
+                customers.getSize(),
+                customers.getTotal()
         );
 
         return Response.ok(pageResponse)
@@ -137,16 +130,10 @@ public class CustomerController {
     @APIResponse(responseCode = "404", description = "Cliente no encontrado")
     public Response updateCustomer(@PathParam("id") Long id, @Valid CustomerUpdateRequest request) {
         Log.info("Received customer update request for ID: " + id);
+        Customer customer = CustomerDtoMapper.toDomain(request);
 
-        Customer customer = customerService.updateCustomer(
-                id,
-                request.email(),
-                request.address(),
-                request.phone(),
-                request.country()
-        );
-
-        CustomerResponse customerResponse = CustomerDtoMapper.toDto(customer);
+        Customer updatedCustomer = customerService.updateCustomer(id, customer);
+        CustomerResponse customerResponse = CustomerDtoMapper.toDto(updatedCustomer);
 
         return Response.ok(customerResponse)
                 .build();

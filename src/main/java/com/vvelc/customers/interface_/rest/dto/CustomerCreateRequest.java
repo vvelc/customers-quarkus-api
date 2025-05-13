@@ -26,10 +26,13 @@ public record CustomerCreateRequest(
         @Size(max = 100, message = "Email must not exceed 100 characters")
         String email,
 
+        @NotBlank(message = "Address is required")
         @Size(max = 255, message = "Address must not exceed 255 characters")
         String address,
 
-        @Size(max = 20, message = "Phone must not exceed 20 characters")
+        @NotBlank(message = "Phone is required")
+        @Pattern(regexp = "^\\+?[0-9\\-\\s()]*$", message = "Phone must be a valid phone number")
+        @Size(min = 7, max = 20, message = "Phone must be between 7 and 20 characters")
         String phone,
 
         @NotBlank(message = "Country is required")

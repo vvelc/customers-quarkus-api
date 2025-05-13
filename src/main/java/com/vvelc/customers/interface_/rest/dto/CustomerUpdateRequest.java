@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record CustomerUpdateRequest(
-        @NotBlank(message = "Email is required")
         @Email(message = "Email must be a valid email address")
         @Size(max = 100, message = "Email must not exceed 100 characters")
         String email,
@@ -18,7 +17,6 @@ public record CustomerUpdateRequest(
         @Size(max = 20, message = "Phone must not exceed 20 characters")
         String phone,
 
-        @NotBlank(message = "Country is required")
         @Size(min = 2, max = 2, message = "Country must be exactly 2 characters")
         @Pattern(regexp = "^[A-Z]{2}$", message = "Country must be in ISO 3166-1 alpha-2 format (uppercase letters)")
         String country
