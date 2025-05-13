@@ -7,46 +7,49 @@ import com.vvelc.customers.domain.exception.CountryServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 public class CountryValidationRestAdapter implements CountryValidationPort {
 
-    @RestClient
-    final CountryValidationApiClient countryApiClient;
-
     @Inject
-    public CountryValidationRestAdapter(CountryValidationApiClient countryApiClient) {
-        this.countryApiClient = countryApiClient;
-    }
+    @RestClient
+    private CountryValidationApiClient countryApiClient;
+//
+//    public CountryValidationRestAdapter(@RestClient CountryValidationApiClient countryApiClient) {
+//        this.countryApiClient = countryApiClient;
+//    }
 
     @Override
     public CountryInfo findByIsoCode(String isoCode) throws CountryNotFoundException, CountryServiceException {
-        try {
-            Response response = countryApiClient.getCountryByCode(isoCode);
-
-            if (response.getStatus() == 404) {
-                throw new CountryNotFoundException(isoCode);
-            }
-
-            if (response.getStatus() != 200) {
-                throw new CountryServiceException("Unexpected response from country API: " + response.getStatus());
-            }
-
-            var jsonArray = response.readEntity(JsonArray.class);
+        try (Response response = countryApiClient.getCountryByCode(isoCode)) {
+            JsonArray jsonArray = response.readEntity(JsonArray.class);
             if (jsonArray.isEmpty()) throw new CountryNotFoundException(isoCode);
 
-            var json = jsonArray.getJsonObject(0);
-            String name = json.getJsonObject("name").getString("common");
-            String demonym = json.getJsonObject("demonyms")
+            JsonObject json = jsonArray.getJsonObject(0);
+
+            String name = json.getJsonObject("name").getString("common", "Unknown");
+            String demonym = json
+                    .getJsonObject("demonyms")
                     .getJsonObject("eng")
-                    .getString("m");
+                    .getString("m", "N/A");
+
 
             return new CountryInfo(isoCode.toUpperCase(), name, demonym);
+        } catch (WebApplicationException e) {
+            int status = e.getResponse().getStatus();
+
+            if (status == Response.Status.NOT_FOUND.getStatusCode())
+                throw new CountryNotFoundException("Country not found: " + isoCode);
+
+            throw new CountryServiceException("Unexpected response from country API: " + e);
         } catch (CountryNotFoundException e) {
-            throw new CountryNotFoundException("Country not found: " + e);
+            throw new CountryNotFoundException("Country not found: " + isoCode);
         } catch (Exception e) {
             throw new CountryServiceException("Error calling external country API: " + e);
         }
