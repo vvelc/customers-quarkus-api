@@ -27,6 +27,12 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
                     .build();
         }
 
+        if(exception instanceof jakarta.ws.rs.NotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorResponse("NotFound", exception.getMessage()))
+                    .build();
+        }
+
         LOG.error("Unhandled exception", exception);
 
         boolean isDev = "dev".equals(System.getProperty("quarkus.profile", "prod"));
