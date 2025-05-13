@@ -257,7 +257,8 @@ Para garantizar la **integridad del esquema** y un punto de partida reproducible
   * Build + Test
   * Verificación de cobertura
   * Análisis estático con SonarQube
-* Codecov: \[Badge]
+* Codecov:
+  * [![codecov](https://codecov.io/github/vvelc/customers-quarkus-api/graph/badge.svg?token=8Z51LFOIAQ)](https://codecov.io/github/vvelc/customers-quarkus-api)
 * SonarQube: 
   * [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vvelc_customers-quarkus-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vvelc_customers-quarkus-api)
   * [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=vvelc_customers-quarkus-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=vvelc_customers-quarkus-api)
