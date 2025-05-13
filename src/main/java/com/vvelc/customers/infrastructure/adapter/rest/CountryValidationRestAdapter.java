@@ -10,7 +10,6 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
@@ -18,12 +17,11 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  * It implements the CountryValidationPort interface.
  */
 @ApplicationScoped
-@RequiredArgsConstructor
 public class CountryValidationRestAdapter implements CountryValidationPort {
 
     @Inject
     @RestClient
-    private final CountryValidationApiClient countryApiClient;
+    private CountryValidationApiClient countryApiClient;
 
     @Override
     public CountryInfo findByIsoCode(String isoCode) throws CountryNotFoundException, CountryServiceException {
