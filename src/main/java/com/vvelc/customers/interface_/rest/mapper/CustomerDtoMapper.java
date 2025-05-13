@@ -14,7 +14,8 @@ public class CustomerDtoMapper {
                 customer.getEmail(),
                 customer.getAddress(),
                 customer.getPhone(),
-                customer.getCountry()
+                customer.getCountry(),
+                customer.getDemonym()
         );
     }
 }

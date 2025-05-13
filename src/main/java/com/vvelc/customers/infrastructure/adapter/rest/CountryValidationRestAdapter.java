@@ -48,7 +48,7 @@ public class CountryValidationRestAdapter implements CountryValidationPort {
         } catch (CountryNotFoundException e) {
             throw new CountryNotFoundException("Country not found: " + e);
         } catch (Exception e) {
-            throw new CountryServiceException("Error calling external country API", e);
+            throw new CountryServiceException("Error calling external country API: " + e);
         }
     }
 }

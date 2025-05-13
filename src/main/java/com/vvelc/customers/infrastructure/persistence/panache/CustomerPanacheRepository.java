@@ -7,5 +7,5 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
-public class CustomerPanacheRepository implements PanacheRepositoryBase<CustomerEntity, UUID> {
+public class CustomerPanacheRepository implements PanacheRepositoryBase<CustomerEntity, Long> {
 }

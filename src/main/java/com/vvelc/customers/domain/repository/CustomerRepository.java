@@ -15,5 +15,6 @@ public interface CustomerRepository  {
     Optional<Customer> update(Customer customer);
     Long count();
     Long countByCountry(String country);
+    boolean existsByEmail(String email);
     boolean deleteById(Long id);
 }

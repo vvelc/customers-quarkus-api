@@ -1,45 +1,45 @@
-#Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-release.properties
-.flattened-pom.xml
+# Maven
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar.sha256
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Eclipse
 .project
 .classpath
 .settings/
-bin/
+
+# System-specific
+*.sublime*
+*.bak
+*.tmp
 
 # IntelliJ
-.idea
-*.ipr
-*.iml
-*.iws
+out/
 
-# NetBeans
-nb-configuration.xml
+# Test reports
+/coverage/
+jacoco.exec
 
-# Visual Studio Code
-.vscode
-.factorypath
-
-# OSX
-.DS_Store
-
-# Vim
-*.swp
-*.swo
-
-# patch
-*.orig
-*.rej
-
-# Local environment
-.env
-
-# Plugin directory
-/.quarkus/cli/plugins/
-# TLS Certificates
-.certs/
+# Docker/CI
+*.pid
+docker-compose.override.yml

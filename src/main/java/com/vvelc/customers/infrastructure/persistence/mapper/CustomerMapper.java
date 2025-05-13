@@ -20,7 +20,7 @@ public class CustomerMapper {
                 entity.getAddress(),
                 entity.getPhone(),
                 entity.getCountry(),
-                entity.getDemonyn(),
+                entity.getDemonym()
         );
     }
 
@@ -40,7 +40,7 @@ public class CustomerMapper {
         entity.setAddress(domain.getAddress());
         entity.setPhone(domain.getPhone());
         entity.setCountry(domain.getCountry());
-        entity.setDemonyn(domain.getDemonym());
+        entity.setDemonym(domain.getDemonym());
 
         return entity;
     }

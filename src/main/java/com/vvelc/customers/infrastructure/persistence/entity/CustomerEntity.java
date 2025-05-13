@@ -12,6 +12,9 @@ import lombok.Setter;
         indexes = {
                 @Index(name = "idx_customers_email", columnList = "email"),
                 @Index(name = "idx_customers_country", columnList = "country")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_customer_email", columnNames = "email")
         }
 )
 @NoArgsConstructor

@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @ApplicationScoped
-@RequiredArgsConstructor
+// TODO: @RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -46,7 +46,7 @@ public class CustomerService {
         Log.infof("Creating new customer with name: %s %s %s %s", firstName, secondName, firstLastName, secondLastName);
 
         Log.info("Validating country: " + country);
-        CountryInfo countryInfo = countryValidationPort.findByIsoCode(country)
+        CountryInfo countryInfo = countryValidationPort.findByIsoCode(country);
 
         Log.infof("Country validated successfully: %s %s %s", countryInfo.name(), countryInfo.isoCode(), countryInfo.demonym());
         final String countryDemonym = countryInfo.demonym();
@@ -137,7 +137,7 @@ public class CustomerService {
                 });
         if (country != null && !country.isBlank()) {
             Log.info("Validating country: " + country);
-            CountryInfo countryInfo = countryValidationPort.findByIsoCode(country)
+            CountryInfo countryInfo = countryValidationPort.findByIsoCode(country);
 
             Log.infof("Country validated successfully: %s %s %s", countryInfo.name(), countryInfo.isoCode(), countryInfo.demonym());
             final String countryDemonym = countryInfo.demonym();
@@ -160,7 +160,7 @@ public class CustomerService {
                     Log.info("Customer updated successfully with ID: " + updatedCustomer.getId());
                     return updatedCustomer;
                 })
-                .orElseThrow(e -> {
+                .orElseThrow(() -> {
                     Log.error("Failed to update customer with ID: " + id);
                     return new IllegalStateException("Error updating customer with ID: " + id);
                 });

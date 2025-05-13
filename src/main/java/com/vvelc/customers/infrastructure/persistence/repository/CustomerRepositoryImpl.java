@@ -28,7 +28,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public List<Customer> findAll() {
+    public List<Customer> findAll(int page, int size) {
         return customerPanacheRepository.findAll().list().stream()
                 .map(CustomerMapper::toDomain)
                 .toList();
@@ -41,7 +41,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public List<Customer> findByCountry(String country) {
+    public List<Customer> findByCountry(String country, int page, int size) {
         return customerPanacheRepository.find("country", country).list().stream()
                 .map(CustomerMapper::toDomain)
                 .toList();
@@ -56,7 +56,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                             entity.setPhone(customer.getPhone());
                             entity.setCountry(customer.getCountry());
                             entity.setDemonym(customer.getDemonym());
-                            return entity;
+                            return CustomerMapper.toDomain(entity);
                         }
                 );
     }
@@ -74,5 +74,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public Long countByCountry(String country) {
         return customerPanacheRepository.count("country", country);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return customerPanacheRepository.count("email", email) > 0;
     }
 }

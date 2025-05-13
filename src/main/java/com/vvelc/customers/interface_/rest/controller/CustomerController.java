@@ -79,7 +79,7 @@ public class CustomerController {
             schema = @Schema(implementation = CustomerResponse.class)
     ))
     @APIResponse(responseCode = "404", description = "Cliente no encontrado")
-    public Response getById(@PathParam("id") UUID id) {
+    public Response getById(@PathParam("id") Long id) {
         Log.info("Received request to get customer by ID: " + id);
 
         Customer customer = customerService.getCustomerById(id);
@@ -122,6 +122,7 @@ public class CustomerController {
                 customers.page(),
                 customers.size(),
                 customers.total()
+        );
 
         return Response.ok(pageResponse)
                 .build();
