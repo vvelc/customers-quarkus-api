@@ -1,7 +1,7 @@
 package com.vvelc.customers.infrastructure.adapter.rest;
 
-import com.vvelc.customers.application.port.outbound.CountryValidationPort;
 import com.vvelc.customers.application.model.CountryInfo;
+import com.vvelc.customers.application.port.outbound.CountryValidationPort;
 import com.vvelc.customers.domain.exception.CountryNotFoundException;
 import com.vvelc.customers.domain.exception.CountryServiceException;
 import jakarta.enterprise.context.ApplicationScoped;
