@@ -11,72 +11,72 @@ import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Servicio que orquesta la lógica de negocio para la gestión de Clientes.
+ * Encapsula llamadas a repositorio y validación externa de país.
+ */
 @ApplicationScoped
-// TODO: @RequiredArgsConstructor
+@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CountryValidationPort countryValidationPort;
 
-    @Inject
-    public CustomerService(CustomerRepository customerRepository, CountryValidationPort countryValidationPort) {
-        this.customerRepository = customerRepository;
-        this.countryValidationPort = countryValidationPort;
-    }
-    
     private boolean isEmailAlreadyRegistered(String email) {
         return customerRepository.existsByEmail(email);
     }
 
+    /**
+     * Crea un nuevo cliente.
+     *
+     * @param customer DTO con datos de entrada (firstName, email, country…)
+     * @return DTO de respuesta con ID, datos persistidos y Location calculada
+     * @throws CustomerAlreadyExistsException   si ya hay un cliente con ese email
+     * @throws CountryNotFoundException si el código de país no existe
+     * @throws CountryServiceException si hay un error al consultar el servicio de validación de países
+     */
     @Transactional
     @Counted(value = "customers_created", description = "Total de clientes creados")
     @Timed(value = "customer_creation_time", description = "Tiempo en registrar un cliente")
-    public Long createCustomer(
-            String firstName, String secondName,
-            String firstLastName, String secondLastName,
-            String email, String address,
-            String phone, String country
-    ) throws BadRequestException, CountryNotFoundException, CountryServiceException {
-        Log.infof("Creating new customer with name: %s %s %s %s", firstName, secondName, firstLastName, secondLastName);
+    public Customer createCustomer(Customer customer) throws CustomerAlreadyExistsException, CountryNotFoundException, CountryServiceException {
+        Log.infof("Creating new customer with name: %s %s %s %s",
+                customer.getFirstName(), customer.getSecondName(), customer.getFirstLastName(), customer.getSecondLastName());
 
-        Log.info("Validating country: " + country);
+        String country = customer.getCountry();
+        Log.infof("Validating country: %s", country);
         CountryInfo countryInfo = countryValidationPort.findByIsoCode(country);
 
         Log.infof("Country validated successfully: %s %s %s", countryInfo.name(), countryInfo.isoCode(), countryInfo.demonym());
         final String countryDemonym = countryInfo.demonym();
+        customer.setDemonym(countryDemonym);
 
-        Log.info("Checking if email is already registered: " + email);
+        String email = customer.getEmail();
+        Log.infof("Checking if email is already registered: %s", email);
         if (isEmailAlreadyRegistered(email)) {
-            Log.error("Email already registered: " + email);
-            throw new BadRequestException("Email already registered: " + email);
+            Log.errorf("Email already registered: %s", email);
+            throw new CustomerAlreadyExistsException("Email already registered: " + email);
         }
+        Log.infof("Email is available: %s", email);
 
-        Customer customer = new Customer(
-                null,
-                firstName,
-                secondName,
-                firstLastName,
-                secondLastName,
-                email,
-                address,
-                phone,
-                country,
-                countryDemonym
-        );
+        Log.infof("Saving customer to database: %s", customer);
+        Customer createdCustomer = customerRepository.save(customer);
+        Log.info("Customer created successfully with ID: " + createdCustomer.getId());
 
-        customerRepository.save(customer);
-
-        Log.info("Customer created successfully with ID: " + customer.getId());
-
-        return customer.getId();
+        return createdCustomer;
     }
 
+    /**
+     * Busca un cliente por su ID.
+     *
+     * @param customerId ID del cliente a buscar
+     * @return Objeto Customer con los datos del cliente
+     * @throws CustomerNotFoundException si no se encuentra el cliente
+     */
     @Timed(value = "customer.fetch.time", description = "Tiempo en buscar un cliente")
     public Customer getCustomerById(Long customerId) throws CustomerNotFoundException {
         return customerRepository.findById(customerId)
@@ -90,6 +90,13 @@ public class CustomerService {
                 });
     }
 
+    /**
+     * Busca clientes por país.
+     *
+     * @param country     Código del país
+     * @param pageRequest Objeto con información de paginación
+     * @return Lista de clientes en el país especificado
+     */
     @Timed(value = "customer.fetch.by.country.time", description = "Tiempo en buscar clientes por país")
     public PageResponse<Customer> getCustomersByCountry(String country, PageRequest pageRequest) {
         Log.info("Fetching customers by country: " + country);
@@ -105,6 +112,12 @@ public class CustomerService {
         );
     }
 
+    /**
+     * Busca todos los clientes.
+     *
+     * @param pageRequest Objeto con información de paginación
+     * @return Lista de todos los clientes
+     */
     @Timed(value = "customer.fetch.all.time", description = "Tiempo en obtener todos los clientes")
     public PageResponse<Customer> getAllCustomers(PageRequest pageRequest) {
         Log.info("Fetching all customers");
@@ -120,14 +133,22 @@ public class CustomerService {
         );
     }
 
+    /**
+     * Actualiza un cliente existente.
+     *
+     * @param id       ID del cliente a actualizar
+     * @param customer Objeto Customer con los nuevos datos del cliente
+     * @return Objeto Customer con los datos actualizados
+     * @throws CustomerNotFoundException si no se encuentra el cliente
+     * @throws CustomerAlreadyExistsException si el email ya está registrado
+     * @throws IllegalStateException si ocurre un error al actualizar el cliente
+     */
     @Transactional
     @Counted(value = "customers.updated", description = "Total de clientes actualizados")
     @Timed(value = "customer.update.time", description = "Tiempo en actualizar un cliente")
-    public Customer updateCustomer(
-            Long id, String email,
-            String address, String phone,
-            String country
-    ) throws IllegalStateException {
+    public Customer updateCustomer(Long id, Customer customer)
+            throws CustomerNotFoundException, CustomerAlreadyExistsException, IllegalStateException {
+
         Log.info("Attempting to update customer with ID: " + id);
 
         Customer existingCustomer = customerRepository.findById(id)
@@ -135,24 +156,44 @@ public class CustomerService {
                     Log.error("Customer not found for update: " + id);
                     return new CustomerNotFoundException("Customer not found for update: " + id);
                 });
+
+        String country = customer.getCountry();
         if (country != null && !country.isBlank()) {
             Log.info("Validating country: " + country);
             CountryInfo countryInfo = countryValidationPort.findByIsoCode(country);
 
-            Log.infof("Country validated successfully: %s %s %s", countryInfo.name(), countryInfo.isoCode(), countryInfo.demonym());
+            Log.infof("Country validated successfully: %s %s %s",
+                    countryInfo.name(), countryInfo.isoCode(), countryInfo.demonym());
             final String countryDemonym = countryInfo.demonym();
 
             existingCustomer.setCountry(country);
             existingCustomer.setDemonym(countryDemonym);
         }
 
-        if (isEmailAlreadyRegistered(email) && !existingCustomer.getEmail().equals(email)) {
-            Log.error("Email already registered: " + email);
-            throw new BadRequestException("Email already registered: " + email);
+        String email = customer.getEmail();
+        if (email != null && !email.isBlank()) {
+            Log.infof("Validating email availability: %s", email);
+            boolean isSameEmail = email.equals(existingCustomer.getEmail());
+            boolean isEmailRegistered = isEmailAlreadyRegistered(email);
+
+            if (isEmailRegistered && !isSameEmail) {
+                Log.errorf("Email already registered: %s", email);
+                throw new CustomerAlreadyExistsException("Email already registered: " + email);
+            }
+
+            if (isSameEmail) {
+                Log.infof("Email is the same, no update needed: %s", email);
+                return existingCustomer;
+            }
+
+            Log.infof("Email is available: %s", email);
+            existingCustomer.setEmail(email);
         }
 
-        if (email != null && !email.isBlank()) existingCustomer.setEmail(email);
+        String address = customer.getAddress();
         if (address != null && !address.isBlank()) existingCustomer.setAddress(address);
+
+        String phone = customer.getPhone();
         if (phone != null && !phone.isBlank()) existingCustomer.setPhone(phone);
 
         return customerRepository.update(existingCustomer)
@@ -161,11 +202,18 @@ public class CustomerService {
                     return updatedCustomer;
                 })
                 .orElseThrow(() -> {
-                    Log.error("Failed to update customer with ID: " + id);
+                    Log.error("Failed to update customer with ID: " + existingCustomer.getId());
                     return new IllegalStateException("Error updating customer with ID: " + id);
                 });
     }
 
+    /**
+     * Elimina un cliente por su ID.
+     *
+     * @param id ID del cliente a eliminar
+     * @return true si se eliminó correctamente, false si no se encontró el cliente
+     * @throws CustomerNotFoundException si no se encuentra el cliente
+     */
     @Transactional
     @Counted(value = "customers.deleted", description = "Total de clientes eliminados")
     @Timed(value = "customer.deletion.time", description = "Tiempo en eliminar un cliente")
