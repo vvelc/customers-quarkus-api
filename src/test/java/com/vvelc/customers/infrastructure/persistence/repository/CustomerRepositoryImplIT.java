@@ -66,7 +66,7 @@ class CustomerRepositoryImplIT {
     @DisplayName("Should find customers by country")
     void should_find_by_country() {
         List<Customer> customers = repository.findByCountry("US", 0, 10);
-        assertThat(customers).allMatch(c -> c.getCountry().equals("US"));
+        assertThat(customers).isNotEmpty().allMatch(c -> c.getCountry().equals("US"));
     }
 
     @Test
