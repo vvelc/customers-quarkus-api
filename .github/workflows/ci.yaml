@@ -84,8 +84,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Run analysis
-        run: ./mvnw verify -DskipTests=true org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=vvelc_customers-quarkus-api
 
   codecov:
     name: 📊 Code Coverage Report
